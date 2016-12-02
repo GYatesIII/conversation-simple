@@ -90,8 +90,33 @@ function updateMessage(input, response) {
       responseText = 'I did not understand your intent';
     }
   }
-  response.output.text = responseText;
-  return response;
+
+  if (intents && intents.lengh > 0 && entities && entities.length > 0) {
+    var cqlString = generateCql(entities);
+    runCql(cqlString, function (err, data) {
+      // todo - `res` may be a defined variable as well, we need to return a response text
+    });
+  } else {
+    // todo - return a response text
+  }
+}
+
+/**
+ * Updates the response text using the intent confidence
+ * @param  {array} entities The entities from the Watson response
+ * @return {string}         The CQL string
+ */
+function generateCql(entities, callback) {
+  // todo
+}
+
+/**
+ * Updates the response text using the intent confidence
+ * @param  {string} entities The entities from the Watson response
+ * @return {Object}          The server response
+ */
+function runCql(cqlString, callback) {
+  // todo
 }
 
 module.exports = app;

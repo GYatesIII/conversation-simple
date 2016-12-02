@@ -45,6 +45,19 @@ var Api = (function() {
     http.onreadystatechange = function() {
       if (http.readyState === 4 && http.status === 200 && http.responseText) {
         Api.setResponsePayload(http.responseText);
+
+        // TODO
+        var entities = Api.getResponsePayload().entities;
+        var entitiesString = [];
+        for (var i = 0; i < entities.length; i++) {
+          var entity = entities[i];
+          var value = entity.value.replace(/([\\"])/g, '\\$1');
+          entitiesString.push(entity.entity + ':"' + value + '"');
+        }
+        entitiesString = entitiesString.join(' ');
+        console.log(entitiesString);
+        console.log(wcql.parse(entitiesString));
+
       }
     };
 

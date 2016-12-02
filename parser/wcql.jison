@@ -4,8 +4,14 @@
 
 %{
 
-    function ucfirst(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+    function stripQuotes(string) {
+        return string.substring(1, string.length - 1);
+    }
+
+    function formatName(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1).replace(/(_\w)/g, function(m) {
+            return m[1].toUpperCase();
+        });
     }
 
     function compose(query) {
@@ -56,15 +62,20 @@
 %lex
 %%
 
-boolean_not:\S*             return 'NOT';
-boolean_and:\S*             return 'AND';
-boolean_or:\S*              return 'OR';
-[a-z]+                      return 'NAME';
-':'                         return 'COLON';
-\"[^"\\]*(?:\\.[^"\\]*)*\"  return 'VALUE';
-\s+                         /* skip whitespace */
-<<EOF>>                     return 'EOF';
-.                           return 'INVALID';
+boolean_not:\S*                         return 'NOT';
+boolean_and:\S*                         return 'AND';
+boolean_or:\S*                          return 'OR';
+number_criterion\b                      return 'NUMBERCRITERION';
+'number_criterion_range:"less than"'    return 'NUMBERLT';
+'number_criterion_range:"greater than"' return 'NUMBERGT';
+'number_criterion_range:"between"'      return 'NUMBERBETWEEN';
+'sys-number'                            return 'NUMBER';
+[a-z_]+                                 return 'CRITERION';
+':'                                     return 'COLON';
+\"[^"\\]*(?:\\.[^"\\]*)*\"              return 'STRING';
+\s+                                     /* skip whitespace */
+<<EOF>>                                 return 'EOF';
+.                                       return 'INVALID';
 
 /lex
 
@@ -79,6 +90,10 @@ boolean_or:\S*              return 'OR';
 %% /* language grammar */
 
 expressions
+    /* : NUMBERLT EOF */
+    /*     { */
+    /*         return 'lt'; */
+    /*     } */
     : query EOF
         {
             return compose($1);
@@ -159,9 +174,82 @@ andQuery
     ;
 
 criterion
-    : NAME COLON VALUE
+    : CRITERION COLON STRING
         {
             $$ = {};
-            $$[ucfirst($1)] = $3;
+            $$[formatName($1)] = $3;
+        }
+    | numberLessThan number
+        {
+            $$ = {};
+            $$[$1] = '[0,' + $2 + ']';
+        }
+    | numberGreaterThan number
+        {
+            $$ = {};
+            $$[$1] = '[' + $2 + ',0]';
+        }
+    | numberBetween rangeNumber
+        {
+            $$ = {};
+            $$[$1] = $2;
+        }
+    ;
+
+numberLessThan
+    : numberCriterion NUMBERLT
+        {
+            $$ = $1;
+        }
+    | NUMBERLT numberCriterion
+        {
+            $$ = $2;
+        }
+    ;
+
+numberGreaterThan
+    : numberCriterion NUMBERGT
+        {
+            $$ = $1;
+        }
+    | NUMBERGT numberCriterion
+        {
+            $$ = $2;
+        }
+    ;
+
+numberBetween
+    : numberCriterion NUMBERBETWEEN
+        {
+            $$ = $1;
+        }
+    | NUMBERBETWEEN numberCriterion
+        {
+            $$ = $2;
+        }
+    ;
+
+numberCriterion
+    : NUMBERCRITERION COLON STRING
+        {
+            $$ = formatName(stripQuotes($3));
+        }
+    ;
+
+rangeNumber
+    : number number
+        {
+            $$ = '[' + $1 + ',' + $2 + ']';
+        }
+    | AND number number
+        {
+            $$ = '[' + $2 + ',' + $3 + ']';
+        }
+    ;
+
+number
+    : NUMBER COLON STRING
+        {
+            $$ = stripQuotes($3);
         }
     ;

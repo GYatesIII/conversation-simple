@@ -32,7 +32,8 @@
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "phantomjs-prebuilt": "^2.1.13",
-    "supertest": "^1.2.0"
+    "supertest": "^1.2.0",
+    "jison": "https://github.com/zaach/jison#a9e58a6ddcfe5b83345507664cbe6e6179412751"
   },
   "engine": {
     "node": ">= 6.9.x",

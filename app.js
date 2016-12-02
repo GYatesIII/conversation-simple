@@ -117,7 +117,11 @@ function generateCql(entities, callback) {
     entitiesString.push(entity.entity + ':"' + value + '"');
   }
   entitiesString = entitiesString.join(' ');
-  return wcql.parse(entitiesString);
+  try {
+    return wcql.parse(entitiesString);
+  } catch (exception) {
+    return 'Failed to parse CQL';
+  }
 }
 
 /**

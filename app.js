@@ -59,6 +59,45 @@ app.post('/api/message', function(req, res) {
     if (err) {
       return res.status(err.code || 500).json(err);
     }
+
+    var response = data;
+    // if (!response.output || response.output.text[0] === "I'm sorry, I don't understand") {
+    //   response.output = {};
+    // } else {
+    //   return response;
+    // }
+
+    if (response.intents && response.intents.length && response.entities && response.entities.length) {
+      var cqlString = generateCql(response.entities);
+      runCql(cqlString, function (error, resp, body) {
+        if (!error && resp.statusCode == 200) {
+          var result = JSON.parse(body);
+          console.log(result);
+          if (response.intents[0].intent == 'segment_profiles') {
+            var ids = [];
+            for (var profileI in result.data.profiles) {
+              ids.push(result.data.profiles[profileI].id);
+            }
+            var text = "There are " + result.data.total + " profiles with the first five IDs: ";
+            for (var idI in ids) {
+              var text = text + ids[idI] + ", ";
+            }
+            var text = text + "<br>Parsed: " + cqlString;
+
+            response.output.text = text;
+          } else {
+            response.output.text = "There are " + result.data.total + " profiles that match your question<br>Parsed CQL: " + cqlString;
+          }
+
+          return res.json(response);
+        } else {
+          return response;
+        }
+      });
+      response.output.text = cqlString;
+      return response;
+    }
+
     return res.json(updateMessage(payload, data));
   });
 });
@@ -78,20 +117,20 @@ function updateMessage(input, response) {
   }
 
   if (response.intents && response.intents.length && response.entities && response.entities.length) {
-    var cqlString = generateCql(response.entities);
-    runCql(cqlString, function (error, resp, body) {
-      if (!error && resp.statusCode == 200) {
-        var result = JSON.parse(body);
-        console.log(result);
-        if (response.intents[0].intent == 'segment_profiles') {
-          response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
-        } else {
-          response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
-        }
-      } else {
-        return null;
-      }
-    });
+    // var cqlString = generateCql(response.entities);
+    // runCql(cqlString, function (error, resp, body) {
+    //   if (!error && resp.statusCode == 200) {
+    //     var result = JSON.parse(body);
+    //     console.log(result);
+    //     if (response.intents[0].intent == 'segment_profiles') {
+    //       response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
+    //     } else {
+    //       response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
+    //     }
+    //   } else {
+    //     return null;
+    //   }
+    // });
     response.output.text = cqlString;
     return response;
   }

@@ -76,31 +76,24 @@ function updateMessage(input, response) {
   } else {
     return response;
   }
-  if (response.intents && response.intents[0]) {
-    var intent = response.intents[0];
-    // Depending on the confidence of the response the app can return different messages.
-    // The confidence will vary depending on how well the system is trained. The service will always try to assign
-    // a class/intent to the input. If the confidence is low, then it suggests the service is unsure of the
-    // user's intent . In these cases it is usually best to return a disambiguation message
-    // ('I did not understand your intent, please rephrase your question', etc..)
-    if (intent.confidence >= 0.75) {
-      responseText = 'I understood your intent was ' + intent.intent;
-    } else if (intent.confidence >= 0.5) {
-      responseText = 'I think your intent was ' + intent.intent;
-    } else {
-      responseText = 'I did not understand your intent';
-    }
-  }
 
   if (response.intents && response.intents.length && response.entities && response.entities.length) {
     var cqlString = generateCql(response.entities);
-    runCql(cqlString, function (err, data) {
-      // todo - `res` may be a defined variable as well, we need to return a response text
+    runCql(cqlString, function (error, resp, body) {
+      if (!error && resp.statusCode == 200) {
+        var result = JSON.parse(body);
+        console.log(result);
+        if (response.intents[0].intent == 'segment_profiles') {
+          response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
+        } else {
+          response.output.text = "There are " + result.data.total + " profiles | Parsed: " + cqlString;
+        }
+      } else {
+        return null;
+      }
     });
     response.output.text = cqlString;
     return response;
-  } else {
-    // todo - return a response text
   }
 }
 
@@ -130,7 +123,67 @@ function generateCql(entities, callback) {
  * @return {Object}          The server response
  */
 function runCql(cqlString, callback) {
-  // todo
+  // var parameters = {
+  //   options: {
+  //     url: 'https://back.crowdskout.com/segment',
+  //     method: 'PUT',
+  //     json: true,
+  //     body: {
+  //       query: cqlString,
+  //       fields: [
+  //         'FirstName',
+  //         'LastName'
+  //       ],
+  //       offset: 0,
+  //       limit: 5
+  //     },
+  //   }
+  // };
+
+  var request = require('request');
+
+  var body = {
+    query: cqlString,
+    fields: [
+      'FirstName',
+      'LastName'
+    ],
+    offset: 0,
+    limit: 5
+  };
+  var bodyString = JSON.stringify(body);
+  // var options = {
+  //   host: 'back.crowdskout.com',
+  //   port: 443,
+  //   path: '/segment',
+  //   method: 'PUT',
+  //   headers: {
+  //     'Content-type': 'application/json',
+  //     'token': '2bDjWzBQ0YjZ0TwgkFKfl7nlpnANdSCrt2WKLnsG'
+  //   }
+  // };
+
+  var options = {
+    url: 'https://back.crowdskout.com/segment',
+    method: 'PUT',
+    body: bodyString,
+    headers: {
+      'Content-type': 'application/json',
+      'token': '2bDjWzBQ0YjZ0TwgkFKfl7nlpnANdSCrt2WKLnsG'
+    }
+  };
+
+  return request(options, callback);
+
+  //   , function (res) {
+  //     res.setEncoding('utf8');
+  //     res.on('data', function (chunk) {
+  //       console.log('Response: ' + chunk)
+  //     });
+  //   });
+  // segReq.write(bodyString);
+  // segReq.end();
+
 }
 
 module.exports = app;

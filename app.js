@@ -19,6 +19,7 @@
 var express = require('express'); // app server
 var bodyParser = require('body-parser'); // parser for post requests
 var Conversation = require('watson-developer-cloud/conversation/v1'); // watson sdk
+var wcql = require('./public/js/wcql.js');
 
 var app = express();
 
@@ -70,7 +71,7 @@ app.post('/api/message', function(req, res) {
  */
 function updateMessage(input, response) {
   var responseText = null;
-  if (!response.output) {
+  if (!response.output || response.output.text[0] === "I'm sorry, I don't understand") {
     response.output = {};
   } else {
     return response;
@@ -91,11 +92,13 @@ function updateMessage(input, response) {
     }
   }
 
-  if (intents && intents.lengh > 0 && entities && entities.length > 0) {
-    var cqlString = generateCql(entities);
+  if (response.intents && response.intents.length && response.entities && response.entities.length) {
+    var cqlString = generateCql(response.entities);
     runCql(cqlString, function (err, data) {
       // todo - `res` may be a defined variable as well, we need to return a response text
     });
+    response.output.text = cqlString;
+    return response;
   } else {
     // todo - return a response text
   }
@@ -107,7 +110,14 @@ function updateMessage(input, response) {
  * @return {string}         The CQL string
  */
 function generateCql(entities, callback) {
-  // todo
+  var entitiesString = [];
+  for (var i = 0; i < entities.length; i++) {
+    var entity = entities[i];
+    var value = entity.value.replace(/([\\"])/g, '\\$1');
+    entitiesString.push(entity.entity + ':"' + value + '"');
+  }
+  entitiesString = entitiesString.join(' ');
+  return wcql.parse(entitiesString);
 }
 
 /**

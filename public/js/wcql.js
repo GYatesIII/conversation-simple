@@ -72,12 +72,12 @@
   }
 */
 var wcql = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o};
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[1,7],$V2=[1,9],$V3=[1,10],$V4=[5,9,10,11,12],$V5=[5,10],$V6=[1,14],$V7=[5,9,10,11],$V8=[5,9,11];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"expressions":3,"query":4,"EOF":5,"NOT":6,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",6:"NOT"},
-productions_: [0,[3,2],[4,1]],
+symbols_: {"error":2,"expressions":3,"query":4,"EOF":5,"criterion":6,"orQuery":7,"andQuery":8,"NOT":9,"OR":10,"AND":11,"NAME":12,"COLON":13,"VALUE":14,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",9:"NOT",10:"OR",11:"AND",12:"NAME",13:"COLON",14:"VALUE"},
+productions_: [0,[3,2],[4,1],[4,1],[4,1],[4,2],[7,3],[7,3],[7,3],[7,3],[8,3],[8,3],[8,3],[8,3],[8,2],[8,2],[8,2],[8,2],[6,3]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -85,18 +85,79 @@ var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
 
-            return $$[$0-1];
+            return compose($$[$0-1]);
         
 break;
 case 2:
 
-            this.$ = 'not';
+            this.$ = $$[$0];
+        
+break;
+case 3:
+
+            this.$ = { 'or': $$[$0], 'sub': true };
+        
+break;
+case 4:
+
+            this.$ = { 'and': $$[$0], 'sub': true };
+        
+break;
+case 5:
+
+            this.$ = { 'not': $$[$0] };
+        
+break;
+case 6: case 10:
+
+            this.$ = $$[$0-2].concat($$[$0]);
+        
+break;
+case 7: case 11:
+
+            this.$ = $$[$0-2].concat([ $$[$0] ]);
+        
+break;
+case 8: case 12:
+
+            this.$ = [ $$[$0-2] ].concat($$[$0]);
+        
+break;
+case 9: case 13:
+
+            this.$ = [ $$[$0-2] ].concat([ $$[$0] ]);
+        
+break;
+case 14:
+
+            this.$ = $$[$0-1].concat($$[$0]);
+        
+break;
+case 15:
+
+            this.$ = $$[$0-1].concat([ $$[$0] ]);
+        
+break;
+case 16:
+
+            this.$ = [ $$[$0-1] ].concat($$[$0]);
+        
+break;
+case 17:
+
+            this.$ = [ $$[$0-1] ].concat([ $$[$0] ]);
+        
+break;
+case 18:
+
+            this.$ = {};
+            this.$[ucfirst($$[$0-2])] = $$[$0];
         
 break;
 }
 },
-table: [{3:1,4:2,6:[1,3]},{1:[3]},{5:[1,4]},{5:[2,2]},{1:[2,1]}],
-defaultActions: {3:[2,2],4:[2,1]},
+table: [{3:1,4:2,6:3,7:4,8:5,9:$V0,12:$V1},{1:[3]},{4:12,5:[1,8],6:3,7:4,8:11,9:$V0,10:$V2,11:$V3,12:$V1},o($V4,[2,2]),o([5,9,11,12],[2,3],{10:[1,13]}),o($V5,[2,4],{6:3,7:4,8:15,4:16,9:$V0,11:$V6,12:$V1}),{4:17,6:3,7:4,8:5,9:$V0,12:$V1},{13:[1,18]},{1:[2,1]},{4:20,6:3,7:19,8:5,9:$V0,12:$V1},{4:22,6:3,7:4,8:21,9:$V0,12:$V1},o($V5,[2,16],{6:3,7:4,8:15,4:16,9:$V0,11:$V6,12:$V1}),{4:12,5:[2,17],6:3,7:4,8:11,9:$V0,10:$V2,11:$V3,12:$V1},{4:24,6:3,7:23,8:5,9:$V0,12:$V1},{4:26,6:3,7:4,8:25,9:$V0,12:$V1},o($V5,[2,14],{6:3,7:4,8:15,4:16,9:$V0,11:$V6,12:$V1}),{4:12,5:[2,15],6:3,7:4,8:11,9:$V0,10:$V2,11:$V3,12:$V1},o([5,9],[2,5],{6:3,7:4,8:11,4:12,10:$V2,11:$V3,12:$V1}),{14:[1,27]},o($V4,[2,8]),o($V7,[2,9],{6:3,7:4,8:11,4:12,12:$V1}),o($V7,[2,12],{6:3,7:4,8:15,4:16,12:$V1}),o($V8,[2,13],{6:3,7:4,8:11,4:12,10:$V2,12:$V1}),o($V4,[2,6]),o($V7,[2,7],{6:3,7:4,8:11,4:12,12:$V1}),o($V7,[2,10],{6:3,7:4,8:15,4:16,12:$V1}),o($V8,[2,11],{6:3,7:4,8:11,4:12,10:$V2,12:$V1}),o($V4,[2,18])],
+defaultActions: {8:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -249,9 +310,51 @@ parse: function parse(input) {
 }};
 
 
-    //js
+    function ucfirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 
-    //
+    function compose(query) {
+        return subcompose(query);
+    }
+
+    function subcompose(query) {
+        if (query.not) {
+            var out = subcompose(query.not);
+            if (query.not.sub) {
+                out = '(' + out + ')';
+            }
+            return 'NOT ' + out;
+        } else if (query.or) {
+            var out = [];
+            for (var i = 0; i < query.or.length; i++) {
+                var sub = subcompose(query.or[i]);
+                if (query.or[i].sub) {
+                    sub = '(' + sub + ')';
+                }
+                out.push(sub);
+            }
+            return out.join(' OR ');
+        } else if (query.and) {
+            var out = [];
+            for (var i = 0; i < query.and.length; i++) {
+                var sub = subcompose(query.and[i]);
+                if (query.and[i].sub) {
+                    sub = '(' + sub + ')';
+                }
+                out.push(sub);
+            }
+            return out.join(' AND ');
+        } else {
+            var criteria = [];
+            for (var c in query) {
+                if (query.hasOwnProperty(c)) {
+                    criteria.push(c + ' = ' + query[c]);
+                }
+            }
+            return '(' + criteria.join(', ') + ')';
+        }
+    }
 
 /* generated by jison-lex 0.3.4 */
 var lexer = (function(){
@@ -581,18 +684,28 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 6;
+case 0:return 9;
 break;
-case 1:/* skip whitespace */
+case 1:return 11;
 break;
-case 2:return 5;
+case 2:return 10;
 break;
-case 3:return 'INVALID';
+case 3:return 12;
+break;
+case 4:return 13;
+break;
+case 5:return 14;
+break;
+case 6:/* skip whitespace */
+break;
+case 7:return 5;
+break;
+case 8:return 'INVALID';
 break;
 }
 },
-rules: [/^(?:boolean_not\S*)/,/^(?:\S+\s+)/,/^(?:$)/,/^(?:.)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3],"inclusive":true}}
+rules: [/^(?:boolean_not\S*)/,/^(?:boolean_and\S*)/,/^(?:boolean_or\S*)/,/^(?:[a-z]+)/,/^(?::)/,/^(?:"[^"\\]*(?:\\.[^"\\]*)*")/,/^(?:\s+)/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8],"inclusive":true}}
 });
 return lexer;
 })();
